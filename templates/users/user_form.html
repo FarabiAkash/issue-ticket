@@ -7,6 +7,9 @@
     <form method="post" class="card" novalidate>
       <div class="card-body">
         {% csrf_token %}
+        {% if seat_summary %}
+          <p class="text-secondary">{{ seat_summary }}</p>
+        {% endif %}
         {% include "partials/form_fields.html" %}
       </div>
       <div class="card-footer">

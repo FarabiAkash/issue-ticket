@@ -20,6 +20,8 @@ Company Admin and Company User accounts must have a company. The three staff rol
 
 An Application Admin or Super Admin creates a company and its first Company Admin. More company admins can be added later. A new company admin is added to the company's existing projects.
 
+Each company has a user limit, set by a Super Admin or Application Admin. It defaults to 10. The limit is how many Company User accounts that company can create. Company Admins do not use a seat, and deactivating a company user does not free one. A Company Admin sees the used seats and cannot change the limit.
+
 A Company Admin or Super Admin creates projects. Every company admin of that company becomes a member of a new project.
 
 Membership rules:

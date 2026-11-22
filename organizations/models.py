@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from accounts.models import User
@@ -14,6 +15,11 @@ class Company(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="companies_created",
+    )
+    user_limit = models.PositiveIntegerField(
+        default=10,
+        validators=[MinValueValidator(0)],
+        help_text="How many company users this company can create.",
     )
 
     class Meta:

@@ -24,6 +24,13 @@ class CompanyCreateForm(forms.Form):
         widget=forms.PasswordInput,
         strip=False,
     )
+    user_limit = forms.IntegerField(
+        label="User limit",
+        min_value=0,
+        required=False,
+        initial=10,
+        help_text="How many company users this company can create. Defaults to 10.",
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,6 +47,12 @@ class CompanyCreateForm(forms.Form):
         if User.objects.filter(username__iexact=username).exists():
             raise forms.ValidationError("A user with that username already exists.")
         return username
+
+    def clean_user_limit(self):
+        value = self.cleaned_data.get("user_limit")
+        if value is None:
+            return 10
+        return value
 
     def clean_password1(self):
         password = self.cleaned_data.get("password1")
@@ -58,6 +71,7 @@ class CompanyCreateForm(forms.Form):
         company = Company.objects.create(
             name=self.cleaned_data["company_name"],
             created_by=actor,
+            user_limit=self.cleaned_data["user_limit"],
         )
         admin_form = CompanyAdminCreateForm(
             data={
@@ -74,6 +88,20 @@ class CompanyCreateForm(forms.Form):
             raise forms.ValidationError(admin_form.errors.as_text())
         admin_form.save()
         return company
+
+
+class CompanyUserLimitForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = ["user_limit"]
+        labels = {"user_limit": "User limit"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["user_limit"].help_text = (
+            "How many company users this company can create."
+        )
+        apply_bootstrap(self)
 
 
 class ProjectForm(forms.ModelForm):

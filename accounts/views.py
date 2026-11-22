@@ -98,7 +98,12 @@ class UserCreateView(RoleRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_company_admin:
+            company = self.request.user.company
+            used = company.users.filter(role=User.Role.COMPANY_USER).count()
             context["page_title"] = "New company user"
+            context["seat_summary"] = (
+                f"{used} of {company.user_limit} company users created."
+            )
         else:
             context["page_title"] = "New user"
         context["cancel_url"] = reverse_lazy("user_list")

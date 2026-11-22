@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import DetailView, FormView, ListView
@@ -20,7 +20,7 @@ from .access import (
     visible_companies,
     visible_projects,
 )
-from .forms import AddMemberForm, CompanyCreateForm, ProjectForm
+from .forms import AddMemberForm, CompanyCreateForm, CompanyUserLimitForm, ProjectForm
 from .models import Company, Project
 from .services import (
     add_member,
@@ -45,7 +45,12 @@ class CompanyListView(CompanyAccessMixin, ListView):
 
     def get_queryset(self):
         return visible_companies(self.request.user).annotate(
-            project_count=Count("projects")
+            project_count=Count("projects", distinct=True),
+            company_user_count=Count(
+                "users",
+                filter=Q(users__role=User.Role.COMPANY_USER),
+                distinct=True,
+            ),
         )
 
     def get_context_data(self, **kwargs):
@@ -78,11 +83,28 @@ class CompanyDetailView(CompanyAccessMixin, DetailView):
     def get_queryset(self):
         return visible_companies(self.request.user)
 
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not can_create_company(request.user):
+            raise PermissionDenied
+        form = CompanyUserLimitForm(request.POST, instance=self.object)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "User limit updated.")
+            return redirect("company_detail", pk=self.object.pk)
+        return self.render_to_response(self.get_context_data(limit_form=form))
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["admins"] = self.object.users.filter(role=User.Role.COMPANY_ADMIN)
         context["projects"] = self.object.projects.all()
         context["can_add_admin"] = can_create_company(self.request.user)
+        context["can_edit_limit"] = context["can_add_admin"]
+        context["company_user_count"] = self.object.users.filter(
+            role=User.Role.COMPANY_USER
+        ).count()
+        if context["can_edit_limit"] and "limit_form" not in context:
+            context["limit_form"] = CompanyUserLimitForm(instance=self.object)
         return context
 
 

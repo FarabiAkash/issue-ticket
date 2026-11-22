@@ -120,6 +120,12 @@ class CompanyUserCreateForm(forms.ModelForm):
         password2 = cleaned.get("password2")
         if password1 and password2 and password1 != password2:
             self.add_error("password2", "Passwords do not match.")
+        used = self.company.users.filter(role=User.Role.COMPANY_USER).count()
+        if used >= self.company.user_limit:
+            self.add_error(
+                None,
+                f"This company can create {self.company.user_limit} users.",
+            )
         return cleaned
 
     def save(self, commit=True):

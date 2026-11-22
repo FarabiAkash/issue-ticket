@@ -41,6 +41,54 @@ class OrganizationAccessTests(TestCase):
     def test_application_admin_creates_company_and_admin(self):
         self.assertEqual(self.company_admin.role, User.Role.COMPANY_ADMIN)
         self.assertEqual(self.company_admin.company, self.company)
+        self.assertEqual(self.company.user_limit, 10)
+
+    def test_company_user_limit_blocks_extra_users_and_ignores_admins(self):
+        self.client.force_login(self.application_admin)
+        response = self.client.post(
+            reverse("company_detail", args=[self.company.pk]),
+            {"user_limit": 2},
+        )
+        self.assertRedirects(response, reverse("company_detail", args=[self.company.pk]))
+        self.company.refresh_from_db()
+        self.assertEqual(self.company.user_limit, 2)
+        self.assertEqual(
+            self.company.users.filter(role=User.Role.COMPANY_USER).count(),
+            0,
+        )
+
+        self.client.force_login(self.company_admin)
+        denied = self.client.post(
+            reverse("company_detail", args=[self.company.pk]),
+            {"user_limit": 20},
+        )
+        self.assertEqual(denied.status_code, 403)
+        self.company.refresh_from_db()
+        self.assertEqual(self.company.user_limit, 2)
+
+        for name in ("user-one", "user-two"):
+            created = self.client.post(
+                reverse("user_create"),
+                {
+                    "username": name,
+                    "email": f"{name}@example.com",
+                    "password1": "S3curePass!",
+                    "password2": "S3curePass!",
+                },
+            )
+            self.assertRedirects(created, reverse("user_list"))
+        blocked = self.client.post(
+            reverse("user_create"),
+            {
+                "username": "user-three",
+                "email": "user-three@example.com",
+                "password1": "S3curePass!",
+                "password2": "S3curePass!",
+            },
+        )
+        self.assertEqual(blocked.status_code, 200)
+        self.assertContains(blocked, "This company can create 2 users.")
+        self.assertFalse(User.objects.filter(username="user-three").exists())
 
     def test_company_admin_creates_project_and_is_a_member(self):
         self.client.force_login(self.company_admin)
