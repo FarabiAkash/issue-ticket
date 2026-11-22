@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ company.name }} · Issue Ticket{% endblock %}
+{% block content %}
+<p class="mb-1"><a href="{% url 'company_list' %}">Companies</a></p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">{{ company.name }}</h1>
+  {% if can_add_admin %}
+    <a class="btn btn-primary" href="{% url 'company_admin_create' company.pk %}">Add company admin</a>
+  {% endif %}
+</div>
+<div class="row g-4">
+  <div class="col-lg-6">
+    <h2 class="h5">Company admins</h2>
+    <ul class="list-group">
+      {% for admin in admins %}
+        <li class="list-group-item">{{ admin.username }} <span class="text-secondary">{{ admin.email }}</span></li>
+      {% empty %}
+        <li class="list-group-item text-secondary">No company admins.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col-lg-6">
+    <h2 class="h5">Projects</h2>
+    <ul class="list-group">
+      {% for project in projects %}
+        <li class="list-group-item">
+          <a href="{% url 'project_detail' project.pk %}">{{ project.name }}</a>
+        </li>
+      {% empty %}
+        <li class="list-group-item text-secondary">No projects yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

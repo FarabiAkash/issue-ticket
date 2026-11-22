@@ -7,8 +7,14 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView
 
+from .access import manageable_users, visible_users
 from .bootstrap import apply_bootstrap
-from .forms import StaffUserCreateForm, StaffUserUpdateForm
+from .forms import (
+    CompanyUserCreateForm,
+    CompanyUserUpdateForm,
+    StaffUserCreateForm,
+    StaffUserUpdateForm,
+)
 from .mixins import RoleRequiredMixin
 from .models import User
 
@@ -46,15 +52,28 @@ class UserListView(RoleRequiredMixin, ListView):
     template_name = "users/user_list.html"
     context_object_name = "users"
     paginate_by = 20
-    allowed_roles = (User.Role.SUPER_ADMIN,)
+    allowed_roles = (User.Role.SUPER_ADMIN, User.Role.COMPANY_ADMIN)
+
+    def get_queryset(self):
+        return visible_users(self.request.user)
 
 
 class UserCreateView(RoleRequiredMixin, CreateView):
     model = User
-    form_class = StaffUserCreateForm
     template_name = "users/user_form.html"
     success_url = reverse_lazy("user_list")
-    allowed_roles = (User.Role.SUPER_ADMIN,)
+    allowed_roles = (User.Role.SUPER_ADMIN, User.Role.COMPANY_ADMIN)
+
+    def get_form_class(self):
+        if self.request.user.is_company_admin:
+            return CompanyUserCreateForm
+        return StaffUserCreateForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.user.is_company_admin:
+            kwargs["company"] = self.request.user.company
+        return kwargs
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -63,17 +82,27 @@ class UserCreateView(RoleRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = "New user"
+        if self.request.user.is_company_admin:
+            context["page_title"] = "New company user"
+        else:
+            context["page_title"] = "New user"
         context["cancel_url"] = reverse_lazy("user_list")
         return context
 
 
 class UserUpdateView(RoleRequiredMixin, UpdateView):
     model = User
-    form_class = StaffUserUpdateForm
     template_name = "users/user_form.html"
     success_url = reverse_lazy("user_list")
-    allowed_roles = (User.Role.SUPER_ADMIN,)
+    allowed_roles = (User.Role.SUPER_ADMIN, User.Role.COMPANY_ADMIN)
+
+    def get_queryset(self):
+        return manageable_users(self.request.user)
+
+    def get_form_class(self):
+        if self.request.user.is_company_admin:
+            return CompanyUserUpdateForm
+        return StaffUserUpdateForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -96,14 +125,16 @@ class UserPasswordView(RoleRequiredMixin, FormView):
     template_name = "users/password_form.html"
     form_class = SetPasswordForm
     success_url = reverse_lazy("user_list")
-    allowed_roles = (User.Role.SUPER_ADMIN,)
+    allowed_roles = (User.Role.SUPER_ADMIN, User.Role.COMPANY_ADMIN)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return super().dispatch(request, *args, **kwargs)
-        self.target = get_object_or_404(User, pk=kwargs["pk"])
-        if request.user.pk == self.target.pk:
-            return redirect("password_change")
+        if request.user.is_authenticated and request.user.role in self.allowed_roles:
+            self.target = get_object_or_404(
+                manageable_users(request.user),
+                pk=kwargs["pk"],
+            )
+            if request.user.pk == self.target.pk:
+                return redirect("password_change")
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):

@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -32,14 +33,51 @@ class User(AbstractUser):
         default=Role.APPLICATION_USER,
         db_index=True,
     )
+    company = models.ForeignKey(
+        "organizations.Company",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="users",
+    )
 
     objects = UserManager()
 
     class Meta:
         ordering = ["username"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        role__in=["company_admin", "company_user"],
+                        company__isnull=False,
+                    )
+                    | models.Q(
+                        role__in=[
+                            "super_admin",
+                            "application_admin",
+                            "application_user",
+                        ],
+                        company__isnull=True,
+                    )
+                ),
+                name="user_company_matches_role",
+            )
+        ]
 
     def __str__(self):
         return self.username
+
+    def clean(self):
+        super().clean()
+        if self.role in self.COMPANY_ROLES and self.company_id is None:
+            raise ValidationError(
+                {"company": "Company roles must belong to a company."}
+            )
+        if self.role in self.STAFF_ROLES and self.company_id is not None:
+            raise ValidationError(
+                {"company": "Staff roles cannot belong to a company."}
+            )
 
     @property
     def is_super_admin(self):

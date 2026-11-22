@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Companies · Issue Ticket{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Companies</h1>
+  {% if can_create_company %}
+    <a class="btn btn-primary" href="{% url 'company_create' %}">New company</a>
+  {% endif %}
+</div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Projects</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for company in companies %}
+          <tr>
+            <td><a href="{% url 'company_detail' company.pk %}">{{ company.name }}</a></td>
+            <td>{{ company.project_count }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="2" class="text-secondary">No companies yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

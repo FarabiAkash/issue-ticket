@@ -27,8 +27,10 @@
             <td>{{ person.get_role_display }}</td>
             <td>{% if person.is_active %}Yes{% else %}No{% endif %}</td>
             <td class="text-end">
-              <a href="{% url 'user_update' person.pk %}">Edit</a>
-              <a class="ms-2" href="{% url 'user_set_password' person.pk %}">Password</a>
+              {% if request.user.is_super_admin or person.is_company_user %}
+                <a href="{% url 'user_update' person.pk %}">Edit</a>
+                <a class="ms-2" href="{% url 'user_set_password' person.pk %}">Password</a>
+              {% endif %}
             </td>
           </tr>
         {% empty %}
