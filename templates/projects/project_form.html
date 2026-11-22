@@ -1,14 +1,20 @@
 {% extends "base.html" %}
 {% block title %}New project · Issue Ticket{% endblock %}
+{% block heading %}New project{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-7">
-    <h1 class="h3 mb-3">New project</h1>
-    <form method="post" novalidate>
-      {% csrf_token %}
-      {% include "partials/form_fields.html" %}
-      <button class="btn btn-primary" type="submit">Create project</button>
-      <a class="btn btn-link" href="{% url 'project_list' %}">Cancel</a>
+<div class="row row-cards">
+  <div class="col-lg-8">
+    <form method="post" class="card" novalidate>
+      <div class="card-body">
+        {% csrf_token %}
+        {% include "partials/form_fields.html" %}
+      </div>
+      <div class="card-footer">
+        <div class="btn-list">
+          <button class="btn btn-primary" type="submit">Create project</button>
+          <a class="btn" href="{% url 'project_list' %}">Cancel</a>
+        </div>
+      </div>
     </form>
   </div>
 </div>

@@ -1,19 +1,25 @@
 {% extends "base.html" %}
 {% block title %}New ticket · Issue Ticket{% endblock %}
+{% block heading %}New ticket{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
+<div class="row row-cards">
   <div class="col-lg-8">
-    <h1 class="h3 mb-3">New ticket</h1>
-    <form method="post" enctype="multipart/form-data" novalidate>
-      {% csrf_token %}
-      {% include "partials/form_fields.html" %}
-      <div class="mb-3">
-        <label class="form-label" for="images">Screenshots</label>
-        <input class="form-control" id="images" type="file" name="images" accept="image/png,image/jpeg,image/gif,image/webp" multiple>
-        <div class="form-text">Optional. JPG, PNG, GIF, or WebP, up to 5 MB each.</div>
+    <form method="post" enctype="multipart/form-data" class="card" novalidate>
+      <div class="card-body">
+        {% csrf_token %}
+        {% include "partials/form_fields.html" %}
+        <div class="mb-3">
+          <label class="form-label" for="images">Screenshots</label>
+          <input class="form-control" id="images" type="file" name="images" accept="image/png,image/jpeg,image/gif,image/webp" multiple>
+          <div class="form-text">Optional. JPG, PNG, GIF, or WebP, up to 5 MB each.</div>
+        </div>
       </div>
-      <button class="btn btn-primary" type="submit">Create ticket</button>
-      <a class="btn btn-link" href="{% url 'ticket_list' %}">Cancel</a>
+      <div class="card-footer">
+        <div class="btn-list">
+          <button class="btn btn-primary" type="submit">Create ticket</button>
+          <a class="btn" href="{% url 'ticket_list' %}">Cancel</a>
+        </div>
+      </div>
     </form>
   </div>
 </div>

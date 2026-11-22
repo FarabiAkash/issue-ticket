@@ -1,41 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Tickets · Issue Ticket{% endblock %}
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h3 mb-0">Tickets</h1>
+{% block heading %}Tickets{% endblock %}
+{% block page_actions %}
   {% if can_create %}
-    <a class="btn btn-primary" href="{% url 'ticket_create' %}{% if selected_project %}?project={{ selected_project }}{% endif %}">New ticket</a>
+    <a class="btn btn-primary" href="{% url 'ticket_create' %}{% if selected_project %}?project={{ selected_project }}{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon" aria-hidden="true"><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+      New ticket
+    </a>
   {% endif %}
-</div>
-<form method="get" class="row g-2 align-items-end mb-3">
-  <div class="col-md-5">
-    <label class="form-label" for="project-filter">Project</label>
-    <select class="form-select" id="project-filter" name="project">
-      <option value="">All projects</option>
-      {% for project in projects %}
-        <option value="{{ project.pk }}" {% if selected_project == project.pk|stringformat:"s" %}selected{% endif %}>
-          {{ project.company.name }} · {{ project.name }}
-        </option>
-      {% endfor %}
-    </select>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body border-bottom">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label" for="project-filter">Project</label>
+        <select class="form-select" id="project-filter" name="project">
+          <option value="">All projects</option>
+          {% for project in projects %}
+            <option value="{{ project.pk }}" {% if selected_project == project.pk|stringformat:"s" %}selected{% endif %}>
+              {{ project.company.name }} · {{ project.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="status-filter">Status</label>
+        <select class="form-select" id="status-filter" name="status">
+          <option value="not_completed" {% if current_status == "not_completed" %}selected{% endif %}>Not completed</option>
+          <option value="all" {% if current_status == "all" %}selected{% endif %}>All</option>
+          {% for value, label in statuses %}
+            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-auto">
+        <button class="btn btn-primary" type="submit">Filter</button>
+      </div>
+    </form>
   </div>
-  <div class="col-md-4">
-    <label class="form-label" for="status-filter">Status</label>
-    <select class="form-select" id="status-filter" name="status">
-      <option value="not_completed" {% if current_status == "not_completed" %}selected{% endif %}>Not completed</option>
-      <option value="all" {% if current_status == "all" %}selected{% endif %}>All</option>
-      {% for value, label in statuses %}
-        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="col-md-auto">
-    <button class="btn btn-outline-primary" type="submit">Filter</button>
-  </div>
-</form>
-<div class="card shadow-sm">
   <div class="table-responsive">
-    <table class="table table-striped mb-0">
+    <table class="table table-vcenter card-table">
       <thead>
         <tr>
           <th>Title</th>
@@ -48,9 +53,9 @@
         {% for ticket in tickets %}
           <tr>
             <td><a href="{% url 'ticket_detail' ticket.pk %}">{{ ticket.title }}</a></td>
-            <td>{{ ticket.project.company.name }} · {{ ticket.project.name }}</td>
-            <td>{{ ticket.get_status_display }}</td>
-            <td>{{ ticket.updated_at }}</td>
+            <td class="text-secondary">{{ ticket.project.company.name }} · {{ ticket.project.name }}</td>
+            <td>{% include "partials/status_badge.html" with status=ticket.status label=ticket.get_status_display %}</td>
+            <td class="text-secondary">{{ ticket.updated_at|date:"M j, Y, P" }}</td>
           </tr>
         {% empty %}
           <tr>

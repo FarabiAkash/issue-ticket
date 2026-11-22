@@ -1,32 +1,43 @@
 {% extends "base.html" %}
 {% block title %}Home · Issue Ticket{% endblock %}
+{% block heading %}Home{% endblock %}
 {% block content %}
-<h1 class="h3">Home</h1>
-<p class="text-secondary">
-  Signed in as <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-  ({{ request.user.get_role_display }}).
-</p>
-<h2 class="h5 mt-4">{{ recent_heading }}</h2>
-{% if recent_tickets %}
-  <div class="list-group mb-4">
-    {% for ticket in recent_tickets %}
-      <a class="list-group-item list-group-item-action" href="{% url 'ticket_detail' ticket.pk %}">
-        <span class="fw-semibold">{{ ticket.title }}</span>
-        <span class="text-secondary">{{ ticket.project.name }} · {{ ticket.get_status_display }}</span>
-      </a>
-    {% endfor %}
+<div class="row row-cards">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="subheader">Signed in</div>
+        <h2 class="h2 mb-1">{{ request.user.get_full_name|default:request.user.username }}</h2>
+        <p class="text-secondary mb-0">{{ request.user.get_role_display }}</p>
+      </div>
+    </div>
   </div>
-{% else %}
-  <p class="text-secondary">No tickets to show.</p>
-{% endif %}
-<div class="d-flex flex-wrap gap-2">
-  <a class="btn btn-outline-primary" href="{% url 'ticket_list' %}">All tickets</a>
-  <a class="btn btn-outline-primary" href="{% url 'project_list' %}">Projects</a>
-  {% if request.user.is_super_admin or request.user.is_application_admin or request.user.is_company_admin %}
-    <a class="btn btn-outline-primary" href="{% url 'company_list' %}">Companies</a>
-  {% endif %}
-  {% if request.user.is_super_admin or request.user.is_company_admin %}
-    <a class="btn btn-primary" href="{% url 'user_list' %}">Manage users</a>
-  {% endif %}
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">{{ recent_heading }}</h2>
+        <div class="card-actions">
+          <a href="{% url 'ticket_list' %}" class="btn btn-sm">All tickets</a>
+        </div>
+      </div>
+      <div class="list-group list-group-flush">
+        {% for ticket in recent_tickets %}
+          <a class="list-group-item list-group-item-action" href="{% url 'ticket_detail' ticket.pk %}">
+            <div class="row align-items-center">
+              <div class="col">
+                <div class="fw-semibold">{{ ticket.title }}</div>
+                <div class="text-secondary">{{ ticket.project.company.name }} · {{ ticket.project.name }}</div>
+              </div>
+              <div class="col-auto">
+                {% include "partials/status_badge.html" with status=ticket.status label=ticket.get_status_display %}
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <div class="list-group-item text-secondary">No tickets to show.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

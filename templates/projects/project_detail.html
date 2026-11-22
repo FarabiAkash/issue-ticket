@@ -1,62 +1,85 @@
 {% extends "base.html" %}
 {% block title %}{{ project.name }} · Issue Ticket{% endblock %}
+{% block page_header %}
+  <div class="page-header d-print-none">
+    <div class="container-xl">
+      <div class="row g-2 align-items-center">
+        <div class="col">
+          <div class="page-pretitle">
+            <a href="{% url 'project_list' %}">Projects</a>
+            · {{ project.company.name }}
+          </div>
+          <h1 class="page-title">{{ project.name }}</h1>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+          <div class="btn-list">
+            {% if is_member %}
+              <a class="btn" href="{% url 'project_chat' project.pk %}">Project chat</a>
+            {% endif %}
+            <a class="btn" href="{% url 'ticket_list' %}?project={{ project.pk }}">Tickets</a>
+            {% if request.user.is_super_admin or request.user.is_company_admin or request.user.is_company_user %}
+              <a class="btn btn-primary" href="{% url 'ticket_create' %}?project={{ project.pk }}">New ticket</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
 {% block content %}
-<p class="mb-1"><a href="{% url 'project_list' %}">Projects</a></p>
-<h1 class="h3">{{ project.name }}</h1>
-<p class="text-secondary mb-1">{{ project.company.name }}</p>
-{% if project.description %}
-  <p>{{ project.description }}</p>
-{% endif %}
-<p>
-  {% if is_member %}
-    <a href="{% url 'project_chat' project.pk %}">Project chat</a>
-    ·
+<div class="row row-cards">
+  {% if project.description %}
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">{{ project.description|linebreaksbr }}</div>
+      </div>
+    </div>
   {% endif %}
-  <a href="{% url 'ticket_list' %}?project={{ project.pk }}">Tickets</a>
-  {% if request.user.is_super_admin or request.user.is_company_admin or request.user.is_company_user %}
-    · <a href="{% url 'ticket_create' %}?project={{ project.pk }}">New ticket</a>
-  {% endif %}
-</p>
-
-<h2 class="h5 mt-4">Members</h2>
-<div class="card shadow-sm mb-4">
-  <ul class="list-group list-group-flush">
-    {% for membership in memberships %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span>
-          {{ membership.user.username }}
-          <span class="text-secondary">{{ membership.user.get_role_display }}</span>
-        </span>
-        {% if can_manage_members and membership.user.pk in removable_ids %}
-          <form method="post">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Members</h2>
+      </div>
+      <div class="list-group list-group-flush">
+        {% for membership in memberships %}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold">{{ membership.user.username }}</div>
+              <div class="text-secondary">{{ membership.user.get_role_display }}</div>
+            </div>
+            {% if can_manage_members and membership.user.pk in removable_ids %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="remove">
+                <input type="hidden" name="user" value="{{ membership.user.pk }}">
+                <button class="btn btn-sm btn-ghost-danger" type="submit">Remove</button>
+              </form>
+            {% endif %}
+          </div>
+        {% empty %}
+          <div class="list-group-item text-secondary">No members yet.</div>
+        {% endfor %}
+      </div>
+      {% if can_manage_members %}
+        <div class="card-body border-top">
+          <h3 class="card-title">Add a member</h3>
+          <form method="post" class="row g-2 align-items-end">
             {% csrf_token %}
-            <input type="hidden" name="action" value="remove">
-            <input type="hidden" name="user" value="{{ membership.user.pk }}">
-            <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+            <input type="hidden" name="action" value="add">
+            <div class="col-md-8">
+              <label class="form-label" for="{{ add_form.user.id_for_label }}">Person</label>
+              {{ add_form.user }}
+              {% for error in add_form.user.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-auto">
+              <button class="btn btn-primary" type="submit">Add</button>
+            </div>
           </form>
-        {% endif %}
-      </li>
-    {% empty %}
-      <li class="list-group-item text-secondary">No members yet.</li>
-    {% endfor %}
-  </ul>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
-
-{% if can_manage_members %}
-  <h2 class="h5">Add a member</h2>
-  <form method="post" class="row g-2 align-items-end">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="add">
-    <div class="col-md-6">
-      <label class="form-label" for="{{ add_form.user.id_for_label }}">Person</label>
-      {{ add_form.user }}
-      {% for error in add_form.user.errors %}
-        <div class="invalid-feedback d-block">{{ error }}</div>
-      {% endfor %}
-    </div>
-    <div class="col-md-auto">
-      <button class="btn btn-primary" type="submit">Add</button>
-    </div>
-  </form>
-{% endif %}
 {% endblock %}

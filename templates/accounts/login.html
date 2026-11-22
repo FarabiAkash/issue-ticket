@@ -1,18 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Log in · Issue Ticket{% endblock %}
-{% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-5">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h1 class="h4 mb-3">Log in</h1>
-        <form method="post" novalidate>
-          {% csrf_token %}
-          {% include "partials/form_fields.html" %}
-          <button class="btn btn-primary" type="submit">Log in</button>
-        </form>
+{% block body %}
+  <main class="page page-center" id="content">
+    <div class="container container-tight py-4">
+      <div class="text-center mb-4">
+        <a href="{% url 'login' %}" class="navbar-brand navbar-brand-autodark">Issue Ticket</a>
+      </div>
+      <div class="card card-md">
+        <div class="card-body">
+          <h1 class="h2 text-center mb-4">Log in</h1>
+          {% include "partials/messages.html" %}
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% include "partials/form_fields.html" %}
+            <div class="form-footer">
+              <button class="btn btn-primary w-100" type="submit">Log in</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+  </main>
 {% endblock %}

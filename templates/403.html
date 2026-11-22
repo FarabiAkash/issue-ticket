@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Forbidden · Issue Ticket{% endblock %}
-{% block content %}
-<h1 class="h3">You cannot open this page</h1>
-<p class="text-secondary">Your role does not have access.</p>
-<a href="{% url 'home' %}">Back to home</a>
+{% block body %}
+  <main class="page page-center" id="content">
+    <div class="container-tight py-4">
+      <div class="empty">
+        <div class="empty-header">403</div>
+        <p class="empty-title">You cannot open this page</p>
+        <p class="empty-subtitle text-secondary">Your role does not have access.</p>
+        <div class="empty-action">
+          <a href="{% url 'home' %}" class="btn btn-primary">Take me home</a>
+        </div>
+      </div>
+    </div>
+  </main>
 {% endblock %}
