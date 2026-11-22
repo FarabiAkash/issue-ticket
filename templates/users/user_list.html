@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Users · Issue Ticket{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Users</h1>
+  <a class="btn btn-primary" href="{% url 'user_create' %}">New user</a>
+</div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Active</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for person in users %}
+          <tr>
+            <td>{{ person.username }}</td>
+            <td>{{ person.get_full_name|default:"—" }}</td>
+            <td>{{ person.email }}</td>
+            <td>{{ person.get_role_display }}</td>
+            <td>{% if person.is_active %}Yes{% else %}No{% endif %}</td>
+            <td class="text-end">
+              <a href="{% url 'user_update' person.pk %}">Edit</a>
+              <a class="ms-2" href="{% url 'user_set_password' person.pk %}">Password</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-secondary">No users yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% if page_obj.has_other_pages %}
+  <nav class="mt-3">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+{% endblock %}

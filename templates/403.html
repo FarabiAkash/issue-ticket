@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Forbidden · Issue Ticket{% endblock %}
+{% block content %}
+<h1 class="h3">You cannot open this page</h1>
+<p class="text-secondary">Your role does not have access.</p>
+<a href="{% url 'home' %}">Back to home</a>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Home · Issue Ticket{% endblock %}
+{% block content %}
+<h1 class="h3">Home</h1>
+<p class="text-secondary">
+  Signed in as <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+  ({{ request.user.get_role_display }}).
+</p>
+{% if request.user.is_super_admin %}
+  <a class="btn btn-primary" href="{% url 'user_list' %}">Manage users</a>
+{% endif %}
+{% endblock %}
