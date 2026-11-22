@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ project.name }} chat · Issue Ticket{% endblock %}
+{% block content %}
+<p class="mb-1"><a href="{% url 'project_detail' project.pk %}">{{ project.name }}</a></p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Project chat</h1>
+  <span class="badge text-bg-secondary" id="chat-status">Connecting</span>
+</div>
+<p class="text-secondary">Only people assigned to {{ project.company.name }} · {{ project.name }} can see this room.</p>
+<ul class="list-group mb-3" id="chat-log" style="max-height: 28rem; overflow-y: auto;">
+  {% for message in chat_messages %}
+    <li class="list-group-item">
+      <div class="d-flex justify-content-between">
+        <strong>{{ message.author.username }}</strong>
+        <span class="text-secondary">{{ message.created_at }}</span>
+      </div>
+      <p class="mb-0 mt-2">{{ message.body|linebreaksbr }}</p>
+    </li>
+  {% empty %}
+    <li class="list-group-item text-secondary" id="chat-empty">No messages yet.</li>
+  {% endfor %}
+</ul>
+<form id="chat-form" class="d-flex gap-2">
+  <label class="visually-hidden" for="chat-body">Message</label>
+  <input class="form-control" id="chat-body" maxlength="2000" placeholder="Write a message" required>
+  <button class="btn btn-primary" type="submit">Send</button>
+</form>
+{{ project.pk|json_script:"chat-project-id" }}
+<script>
+  const projectId = JSON.parse(document.getElementById("chat-project-id").textContent);
+  const log = document.getElementById("chat-log");
+  const status = document.getElementById("chat-status");
+  const form = document.getElementById("chat-form");
+  const input = document.getElementById("chat-body");
+  const scheme = window.location.protocol === "https:" ? "wss" : "ws";
+  const socket = new WebSocket(`${scheme}://${window.location.host}/ws/projects/${projectId}/chat/`);
+
+  function appendMessage(author, body) {
+    const empty = document.getElementById("chat-empty");
+    if (empty) empty.remove();
+    const item = document.createElement("li");
+    item.className = "list-group-item";
+    const heading = document.createElement("strong");
+    heading.textContent = author;
+    const paragraph = document.createElement("p");
+    paragraph.className = "mb-0 mt-2";
+    paragraph.textContent = body;
+    item.append(heading, paragraph);
+    log.append(item);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  socket.addEventListener("open", () => {
+    status.textContent = "Live";
+    status.className = "badge text-bg-success";
+  });
+  socket.addEventListener("close", () => {
+    status.textContent = "Disconnected";
+    status.className = "badge text-bg-danger";
+  });
+  socket.addEventListener("message", (event) => {
+    const data = JSON.parse(event.data);
+    appendMessage(data.author, data.body);
+  });
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const body = input.value.trim();
+    if (!body || socket.readyState !== WebSocket.OPEN) return;
+    socket.send(JSON.stringify({ body }));
+    input.value = "";
+  });
+</script>
+{% endblock %}

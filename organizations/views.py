@@ -16,6 +16,7 @@ from .access import (
     can_create_company,
     can_create_project,
     can_manage_members,
+    is_project_member,
     visible_companies,
     visible_projects,
 )
@@ -199,6 +200,7 @@ class ProjectDetailView(ProjectAccessMixin, DetailView):
         project = self.object
         context["memberships"] = project.memberships.select_related("user")
         context["can_manage_members"] = can_manage_members(self.request.user, project)
+        context["is_member"] = is_project_member(self.request.user, project)
         if context["can_manage_members"] and "add_form" not in context:
             context["add_form"] = AddMemberForm(
                 actor=self.request.user,
