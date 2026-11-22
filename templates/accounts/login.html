@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Log in · Issue Ticket{% endblock %}
 {% block body %}
-  <main class="page page-center" id="content">
-    <div class="container container-tight py-4">
-      <div class="text-center mb-4">
-        <a href="{% url 'login' %}" class="navbar-brand navbar-brand-autodark">Issue Ticket</a>
+  <main class="page page-center login-screen" id="content">
+    <div class="container container-tight py-5">
+      <div class="text-center login-intro">
+        <p class="login-kicker">Project support</p>
+        <h1 class="login-title">Issue Ticket</h1>
+        <p class="login-lead">Companies raise tickets on their projects. Assigned staff update the work, and the same people share a live chat.</p>
       </div>
-      <div class="card card-md">
+      <div class="card card-md login-card">
         <div class="card-body">
-          <h1 class="h2 text-center mb-4">Log in</h1>
+          <h2 class="h2 text-center mb-1">Sign in</h2>
+          <p class="text-secondary text-center mb-4">Use your username or email.</p>
           {% include "partials/messages.html" %}
           <form method="post" novalidate>
             {% csrf_token %}
@@ -19,6 +22,11 @@
           </form>
         </div>
       </div>
+      <ul class="login-points">
+        <li>Tickets, notes, and screenshots</li>
+        <li>Status updates by assigned staff</li>
+        <li>One chat room for each project</li>
+      </ul>
     </div>
   </main>
 {% endblock %}

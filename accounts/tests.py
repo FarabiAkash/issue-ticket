@@ -33,6 +33,28 @@ class RoleAccessTests(TestCase):
         response = self.client.get(reverse("home"))
         self.assertRedirects(response, f"{reverse('login')}?next=/")
 
+    def test_login_accepts_username_or_email(self):
+        by_username = self.client.post(
+            reverse("login"),
+            {"username": "root", "password": "S3curePass!"},
+        )
+        self.assertRedirects(by_username, reverse("home"))
+        self.client.logout()
+
+        by_email = self.client.post(
+            reverse("login"),
+            {"username": "root@example.com", "password": "S3curePass!"},
+        )
+        self.assertRedirects(by_email, reverse("home"))
+        self.client.logout()
+
+        rejected = self.client.post(
+            reverse("login"),
+            {"username": "root@example.com", "password": "wrong-password"},
+        )
+        self.assertEqual(rejected.status_code, 200)
+        self.assertFalse(rejected.wsgi_request.user.is_authenticated)
+
     def test_super_admin_can_open_user_list(self):
         self.client.force_login(self.super_admin)
         response = self.client.get(reverse("user_list"))

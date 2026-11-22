@@ -1,0 +1,101 @@
+html,
+body,
+.page {
+  background: #e7eef6;
+}
+
+main.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(900px 480px at 12% 0%, rgb(125 211 252 / 45%), transparent 60%),
+    radial-gradient(720px 420px at 100% 8%, rgb(167 139 250 / 38%), transparent 55%),
+    linear-gradient(155deg, #0c2340 0%, #1a4b86 48%, #3d8fd4 100%);
+}
+
+.login-intro {
+  margin-bottom: 1.5rem;
+}
+
+.login-kicker {
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 72%);
+}
+
+.login-title {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.login-lead {
+  max-width: 34rem;
+  margin: 0 auto;
+  color: rgb(255 255 255 / 82%);
+}
+
+.login-card {
+  border: 0;
+  box-shadow: 0 1.25rem 3rem rgb(8 20 40 / 28%);
+}
+
+.login-points {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: rgb(255 255 255 / 80%);
+  font-size: 0.875rem;
+}
+
+.login-points li::before {
+  content: "";
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: #7dd3fc;
+  vertical-align: middle;
+}
+
+.navbar-vertical[data-bs-theme="dark"] {
+  --tblr-navbar-bg: #1b2838;
+  --tblr-navbar-color: rgb(255 255 255 / 78%);
+  --tblr-navbar-hover-color: #fff;
+  --tblr-navbar-active-color: #fff;
+  --tblr-navbar-active-bg: rgb(255 255 255 / 8%);
+  --tblr-navbar-border-color: rgb(255 255 255 / 8%);
+  background: #1b2838;
+  color: rgb(255 255 255 / 82%);
+}
+
+.navbar-vertical[data-bs-theme="dark"] .navbar-brand a,
+.navbar-vertical[data-bs-theme="dark"] .nav-link {
+  color: rgb(255 255 255 / 82%);
+}
+
+.navbar-vertical[data-bs-theme="dark"] .nav-link:hover,
+.navbar-vertical[data-bs-theme="dark"] .nav-link.active {
+  color: #fff;
+  background: rgb(255 255 255 / 8%);
+}
+
+.navbar-vertical[data-bs-theme="dark"] .nav-link .text-secondary {
+  color: rgb(255 255 255 / 55%) !important;
+}
+
+.navbar-vertical[data-bs-theme="dark"] .dropdown-menu,
+.navbar-vertical[data-bs-theme="dark"] .dropdown-item {
+  color: var(--tblr-body-color);
+}

@@ -1,17 +1,185 @@
 {% extends "base.html" %}
-{% block title %}Home · Issue Ticket{% endblock %}
-{% block heading %}Home{% endblock %}
-{% block content %}
-<div class="row row-cards">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-body">
-        <div class="subheader">Signed in</div>
-        <h2 class="h2 mb-1">{{ request.user.get_full_name|default:request.user.username }}</h2>
-        <p class="text-secondary mb-0">{{ request.user.get_role_display }}</p>
+{% block title %}Dashboard · Issue Ticket{% endblock %}
+{% block page_header %}
+  <div class="page-header d-print-none">
+    <div class="container-xl">
+      <div class="row g-2 align-items-center">
+        <div class="col">
+          <div class="page-pretitle">{{ request.user.get_role_display }}</div>
+          <h1 class="page-title">Dashboard</h1>
+        </div>
+        <div class="col-auto ms-auto d-print-none">
+          <a class="btn btn-primary" href="{% url 'ticket_list' %}">View tickets</a>
+        </div>
       </div>
     </div>
   </div>
+{% endblock %}
+{% block content %}
+<div class="row row-cards">
+  <div class="col-sm-6 col-lg-3">
+    <a class="card card-link" href="{% url 'ticket_list' %}?status=not_completed">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar bg-orange text-white me-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon" aria-hidden="true"><path d="M15 5l0 2" /><path d="M15 11l0 2" /><path d="M15 17l0 2" /><path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4v-3a2 2 0 0 1 2 -2" /></svg>
+          </span>
+          <div>
+            <div class="subheader">Pending tickets</div>
+            <div class="h1 mb-0">{{ stats.pending }}</div>
+          </div>
+        </div>
+        <div class="text-secondary mt-3">Open, in progress, or waiting</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <a class="card card-link" href="{% url 'project_list' %}">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar bg-primary text-white me-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon" aria-hidden="true"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" /></svg>
+          </span>
+          <div>
+            <div class="subheader">Projects</div>
+            <div class="h1 mb-0">{{ stats.project_count }}</div>
+          </div>
+        </div>
+        <div class="text-secondary mt-3">Projects you can open</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    {% if stats.people_url %}
+      <a class="card card-link" href="{{ stats.people_url }}">
+    {% else %}
+      <div class="card">
+    {% endif %}
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <span class="avatar bg-green text-white me-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon" aria-hidden="true"><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
+          </span>
+          <div>
+            <div class="subheader">{{ stats.people_label }}</div>
+            <div class="h1 mb-0">{{ stats.people_count }}</div>
+          </div>
+        </div>
+        <div class="text-secondary mt-3">
+          {% if stats.people_url %}Accounts you can manage{% else %}Members of your projects{% endif %}
+        </div>
+      </div>
+    {% if stats.people_url %}</a>{% else %}</div>{% endif %}
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    {% if stats.show_companies %}
+      <a class="card card-link" href="{% url 'company_list' %}">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <span class="avatar bg-azure text-white me-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon" aria-hidden="true"><path d="M3 21l18 0" /><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" /><path d="M9 8l1 0" /><path d="M9 12l1 0" /><path d="M14 8l1 0" /><path d="M14 12l1 0" /></svg>
+            </span>
+            <div>
+              <div class="subheader">Companies</div>
+              <div class="h1 mb-0">{{ stats.company_count }}</div>
+            </div>
+          </div>
+          <div class="text-secondary mt-3">Companies you can open</div>
+        </div>
+      </a>
+    {% else %}
+      <a class="card card-link" href="{% url 'ticket_list' %}?status=all">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <span class="avatar bg-azure text-white me-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon" aria-hidden="true"><path d="M9 6l11 0" /><path d="M9 12l11 0" /><path d="M9 18l11 0" /><path d="M5 6l0 .01" /><path d="M5 12l0 .01" /><path d="M5 18l0 .01" /></svg>
+            </span>
+            <div>
+              <div class="subheader">Tickets</div>
+              <div class="h1 mb-0">{{ stats.total_tickets }}</div>
+            </div>
+          </div>
+          <div class="text-secondary mt-3">Every ticket on your projects</div>
+        </div>
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Tickets by project</h2>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+          <thead>
+            <tr>
+              <th>Project</th>
+              {% if stats.show_company_column %}<th>Company</th>{% endif %}
+              <th>Pending</th>
+              <th>Total</th>
+              <th class="w-25">Share pending</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for project in stats.projects %}
+              <tr>
+                <td><a href="{% url 'project_detail' project.pk %}">{{ project.name }}</a></td>
+                {% if stats.show_company_column %}
+                  <td class="text-secondary">{{ project.company.name }}</td>
+                {% endif %}
+                <td>
+                  {% if project.pending_count %}
+                    <span class="badge bg-orange-lt">{{ project.pending_count }}</span>
+                  {% else %}
+                    <span class="text-secondary">0</span>
+                  {% endif %}
+                </td>
+                <td class="text-secondary">{{ project.ticket_count }}</td>
+                <td>
+                  <div class="progress progress-sm">
+                    <div class="progress-bar bg-orange" style="width: {% if project.ticket_count %}{% widthratio project.pending_count project.ticket_count 100 %}{% else %}0{% endif %}%" role="progressbar" aria-valuenow="{{ project.pending_count }}" aria-valuemin="0" aria-valuemax="{{ project.ticket_count }}" aria-label="Pending share for {{ project.name }}"></div>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="{% if stats.show_company_column %}5{% else %}4{% endif %}" class="text-secondary">No projects yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Ticket status</h2>
+        <div class="card-actions">
+          <span class="text-secondary">{{ stats.total_tickets }} total</span>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if stats.total_tickets %}
+          <div class="progress progress-separated mb-3">
+            {% for item in stats.statuses %}
+              <div class="progress-bar bg-{{ item.tone }}" style="width: {{ item.percent }}%" role="progressbar" aria-label="{{ item.label }}"></div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% for item in stats.statuses %}
+          <div class="d-flex align-items-center mb-2">
+            <span class="badge bg-{{ item.tone }}-lt me-2">{{ item.label }}</span>
+            <span class="ms-auto fw-semibold">{{ item.count }}</span>
+          </div>
+        {% endfor %}
+        <div class="text-secondary mt-3">{{ stats.pending_percent }}% still pending</div>
+      </div>
+    </div>
+  </div>
+
   <div class="col-12">
     <div class="card">
       <div class="card-header">

@@ -12,6 +12,7 @@ from .bootstrap import apply_bootstrap
 from .forms import (
     CompanyUserCreateForm,
     CompanyUserUpdateForm,
+    LoginForm,
     StaffUserCreateForm,
     StaffUserUpdateForm,
 )
@@ -24,8 +25,9 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from tickets.access import recent_tickets
+        from tickets.access import dashboard_for, recent_tickets
 
+        context["stats"] = dashboard_for(self.request.user)
         context["recent_tickets"] = recent_tickets(self.request.user)
         context["recent_heading"] = (
             "Open tickets"
@@ -37,6 +39,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
 class StyledLoginView(LoginView):
     template_name = "accounts/login.html"
+    authentication_form = LoginForm
     redirect_authenticated_user = True
 
     def get_form(self, form_class=None):
