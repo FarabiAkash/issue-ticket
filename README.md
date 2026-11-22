@@ -46,7 +46,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Daphne serves the site, including project chat websockets, at `http://127.0.0.1:8000/`. Sign in at `/accounts/login/`.
+Daphne serves the site, including project chat websockets, at `http://127.0.0.1:8000/`. Sign in at `/accounts/login/` with a username or an email. Home is a dashboard of the projects, people, and tickets that account can see.
 
 Leave `REDIS_URL` empty for local development. That uses an in-memory channel layer, which is enough for one server process. Set `REDIS_URL` to a Redis address, for example `redis://localhost:6379/0`, when more than one process must share chat messages.
 
