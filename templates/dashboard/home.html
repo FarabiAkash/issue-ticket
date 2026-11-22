@@ -6,7 +6,21 @@
   Signed in as <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
   ({{ request.user.get_role_display }}).
 </p>
+<h2 class="h5 mt-4">{{ recent_heading }}</h2>
+{% if recent_tickets %}
+  <div class="list-group mb-4">
+    {% for ticket in recent_tickets %}
+      <a class="list-group-item list-group-item-action" href="{% url 'ticket_detail' ticket.pk %}">
+        <span class="fw-semibold">{{ ticket.title }}</span>
+        <span class="text-secondary">{{ ticket.project.name }} · {{ ticket.get_status_display }}</span>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-secondary">No tickets to show.</p>
+{% endif %}
 <div class="d-flex flex-wrap gap-2">
+  <a class="btn btn-outline-primary" href="{% url 'ticket_list' %}">All tickets</a>
   <a class="btn btn-outline-primary" href="{% url 'project_list' %}">Projects</a>
   {% if request.user.is_super_admin or request.user.is_application_admin or request.user.is_company_admin %}
     <a class="btn btn-outline-primary" href="{% url 'company_list' %}">Companies</a>

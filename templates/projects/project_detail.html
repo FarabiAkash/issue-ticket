@@ -7,6 +7,12 @@
 {% if project.description %}
   <p>{{ project.description }}</p>
 {% endif %}
+<p>
+  <a href="{% url 'ticket_list' %}?project={{ project.pk }}">Tickets</a>
+  {% if request.user.is_super_admin or request.user.is_company_admin or request.user.is_company_user %}
+    · <a href="{% url 'ticket_create' %}?project={{ project.pk }}">New ticket</a>
+  {% endif %}
+</p>
 
 <h2 class="h5 mt-4">Members</h2>
 <div class="card shadow-sm mb-4">

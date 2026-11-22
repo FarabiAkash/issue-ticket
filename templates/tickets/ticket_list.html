@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Tickets · Issue Ticket{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Tickets</h1>
+  {% if can_create %}
+    <a class="btn btn-primary" href="{% url 'ticket_create' %}{% if selected_project %}?project={{ selected_project }}{% endif %}">New ticket</a>
+  {% endif %}
+</div>
+<form method="get" class="row g-2 align-items-end mb-3">
+  <div class="col-md-5">
+    <label class="form-label" for="project-filter">Project</label>
+    <select class="form-select" id="project-filter" name="project">
+      <option value="">All projects</option>
+      {% for project in projects %}
+        <option value="{{ project.pk }}" {% if selected_project == project.pk|stringformat:"s" %}selected{% endif %}>
+          {{ project.company.name }} · {{ project.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label" for="status-filter">Status</label>
+    <select class="form-select" id="status-filter" name="status">
+      <option value="not_completed" {% if current_status == "not_completed" %}selected{% endif %}>Not completed</option>
+      <option value="all" {% if current_status == "all" %}selected{% endif %}>All</option>
+      {% for value, label in statuses %}
+        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-auto">
+    <button class="btn btn-outline-primary" type="submit">Filter</button>
+  </div>
+</form>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Project</th>
+          <th>Status</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+          <tr>
+            <td><a href="{% url 'ticket_detail' ticket.pk %}">{{ ticket.title }}</a></td>
+            <td>{{ ticket.project.company.name }} · {{ ticket.project.name }}</td>
+            <td>{{ ticket.get_status_display }}</td>
+            <td>{{ ticket.updated_at }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-secondary">No tickets match this filter.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

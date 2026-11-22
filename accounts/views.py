@@ -22,6 +22,18 @@ from .models import User
 class HomeView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/home.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from tickets.access import recent_tickets
+
+        context["recent_tickets"] = recent_tickets(self.request.user)
+        context["recent_heading"] = (
+            "Open tickets"
+            if self.request.user.role in User.STAFF_ROLES
+            else "Recent tickets"
+        )
+        return context
+
 
 class StyledLoginView(LoginView):
     template_name = "accounts/login.html"
